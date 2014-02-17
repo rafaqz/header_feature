@@ -1,0 +1,230 @@
+<?php
+
+/**
+ * @file off_header.module
+ * Blocks for user and group headers, and helper functions.
+ */
+
+include_once 'off_header_feature.features.inc';
+
+/**
+ * Implements hook_block_info().
+ */
+function off_header_feature_block_info() {
+  $blocks = array(
+    'user_header' => array(
+      'info' => t('User Header'),
+      'cache' => DRUPAL_NO_CACHE
+    ),
+    'group_header' => array(
+      'info' => t('Group Header'),
+      'cache' => DRUPAL_NO_CACHE
+    ),
+  );
+  return $blocks;
+}
+/**
+ * Implements hook_block_view().
+ */
+function off_header_feature_block_view($delta='') {
+  switch($delta) {
+    case 'user_header' :
+      $block = off_header_feature_build_user_header_block();
+      return $block;
+    case 'group_header' :
+      $block = off_header_feature_build_group_header_block();
+      return $block;
+  }
+} 
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * Hide title user for groups pages, as it is allready in the header block.
+ * There could be a check to see if the header block is enabled?
+ */
+function off_header_feature_preprocess_page(&$vars) {
+  // show_title is true by default, unless it's allready set.
+  if (!isset($vars['show_title'])) { 
+    $vars['show_title'] = TRUE; 
+  }
+  // Check if header blocks are set.
+  foreach($vars['page'] as $region) {
+    if (isset($region['off_header_feature_group_header'])) {
+      if (isset($vars['node']->{OG_GROUP_FIELD}) && ($vars['node']->{OG_GROUP_FIELD}['und'][0]['value'] === '1')) { 
+        $vars['show_title'] = FALSE;
+      }
+      return;
+    }
+    if (isset($region['off_header_feature_user_header'])) {
+      if ((arg(0) === 'user')) {
+        $vars['show_title'] = FALSE; 
+      }
+      return;
+    }
+  }
+}
+
+/**
+ * Build a user header block.
+ *
+ * @return array
+ *   A Drupal build array.
+ */
+function off_header_feature_build_user_header_block() {
+  if ((arg(0) === 'user') && is_numeric(arg(1))) {
+    // Load the user from the current path.
+    $account = user_load(arg(1));
+  }
+  if (empty($account)) {
+    return;
+  }
+
+  // Get group title and all parent group titles.
+  if (!empty($account->realname)) {
+    $title = $account->realname;
+  }
+  else {
+    $title = $account->name;
+  }
+
+  // Build the tab menu links.
+  $path = 'user/' . $account->uid;
+  $subpaths = array('Profile' => ''); 
+  $tabs = collabco_integration_tabs_integration($path, $subpaths);
+
+  // Build the block render array.
+  $block = array();
+  $block['content'] = array(
+    'header-banner' => array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('header-banner', 'user')),
+      'header-details' => array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('header-details')),
+        'header-details-main' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-main')),
+          'picture' => array(
+            '#type' => 'markup',
+            '#markup' => theme('user_picture', array('account' => $account)),
+            '#weight' => 0,
+          ),
+          'title' => array(
+            '#type' => 'markup',
+            '#markup' => $title,
+            '#weight' => 1,
+            '#prefix' => '<h1>',
+            '#suffix' => '</h1>'
+          ),
+        ),
+        'header-details-side' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-side')),
+        ),
+      ),
+      'header-content-tab' => $tabs,
+    ),
+  );
+  return $block;
+}
+
+/**
+ * Build a group header block.
+ *
+ * @return array
+ *   A Drupal build array.
+ */
+function off_header_feature_build_group_header_block() {
+  $og_context = og_context();
+  if (empty($og_context)) {
+    return;
+  }
+  $node = node_load($og_context['gid']);
+
+  // Get group title and all parent group titles.
+  $title = off_header_feature_get_title_recursive($node);
+
+  // Determine group privacy status.
+  if (!empty($node->{OG_ACCESS_FIELD}['und'][0]['value']) && $node->{OG_ACCESS_FIELD}['und'][0]['value'] === '1') {
+    $privacy = t('Private');
+  }
+  else {
+    $privacy = t('Public');
+  }
+  
+  // Build the description (body) field.
+  $description = field_view_field('node', $node, 'body', array(
+    'type' => 'text_summary_or_trimmed',
+    'label'=>'hidden',
+    'settings'=>array('trim_length' => 150),
+  ));
+  $description['#weight'] = '4';
+
+  // Build the group subscribe field.
+  $group_field = field_view_field('node', $node, OG_GROUP_FIELD, array(
+    'type' => 'og_group_subscribe',
+    'label'=> 'hidden',
+  ));
+  $group_field['#weight'] = '1';
+
+  // Build the tab menu links.
+  $path = 'node/' . $og_context['gid'];
+  $subpaths = array('Home' => ''); 
+
+  $tabs = collabco_integration_tabs_integration($path, $subpaths);
+
+  // Build the block render array.
+  $block = array();
+  $block['content'] = array(
+    'header-banner' => array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('header-banner', 'group')),
+      'header-details' => array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('header-details')),
+        'header-details-main' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-main')),
+          'title' => array(
+            '#type' => 'markup',
+            '#markup' => $title,
+            '#weight' => 0,
+            '#prefix' => '<h1>',
+            '#suffix' => '</h1>'
+          ),
+          'privacy-status' => array(
+            '#type' => 'markup',
+            '#markup' => $privacy,
+            '#weight' => 2,
+            '#prefix' => '<div class="privacy-status ' . $privacy . '">',
+            '#suffix' => '</div>',
+          ),
+          'description' => $description,
+        ),
+        'header-details-side' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-side')),
+          'group' => $group_field,
+        ),
+      ),
+      'header-content-tab' => $tabs,
+    ),
+  );
+  return $block;
+}
+
+/**
+ * Get group title and any parent group titles, currently only for nodes.
+ *
+ * @return array of group ids.
+ */
+function off_header_feature_get_title_recursive($group) {
+  $title = l($group->title,"node/{$group->nid}");
+  if (empty($group->{OG_AUDIENCE_FIELD}['und'][0]['target_id'])) {
+    return $title;
+  }
+  $group_parent = node_load($group->{OG_AUDIENCE_FIELD}['und'][0]['target_id']);
+  return off_header_feature_get_title_recursive($group_parent) . ' > ' . $title;
+}
+
