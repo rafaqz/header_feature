@@ -1,9 +1,11 @@
 name = OFF Header
+description = Provides a header block for users and groups.
 core = 7.x
 package = Collabco
-description = Provides a header block for users and groups.
 dependencies[] = collabco_integration
-dependencies[] = og
+dependencies[] = fe_block
 dependencies[] = features
-features[fe_block_settings][] = off_header_feature-user_header
+dependencies[] = og
 features[fe_block_settings][] = off_header_feature-group_header
+features[fe_block_settings][] = off_header_feature-user_header
+features[features_api][] = api:2

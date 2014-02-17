@@ -13,7 +13,7 @@ function off_header_feature_default_fe_block_settings() {
   $export['version'] = '2.0';
 
   $export['off_header_feature-group_header'] = array(
-    'cache' => 1,
+    'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'group_header',
@@ -40,7 +40,7 @@ function off_header_feature_default_fe_block_settings() {
   );
 
   $export['off_header_feature-user_header'] = array(
-    'cache' => 1,
+    'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'user_header',

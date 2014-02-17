@@ -5,8 +5,6 @@
  * Blocks for user and group headers, and helper functions.
  */
 
-include_once 'off_header_feature.features.inc';
-
 /**
  * Implements hook_block_info().
  */
