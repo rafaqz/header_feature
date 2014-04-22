@@ -10,8 +10,16 @@
  */
 function off_header_feature_block_info() {
   $blocks = array(
+    'user_footer' => array(
+      'info' => t('User Footer'),
+      'cache' => DRUPAL_NO_CACHE
+    ),
     'user_header' => array(
       'info' => t('User Header'),
+      'cache' => DRUPAL_NO_CACHE
+    ),
+    'group_footer' => array(
+      'info' => t('Group Footer'),
       'cache' => DRUPAL_NO_CACHE
     ),
     'group_header' => array(
@@ -26,8 +34,14 @@ function off_header_feature_block_info() {
  */
 function off_header_feature_block_view($delta='') {
   switch($delta) {
+    case 'user_footer' :
+      $block = off_header_feature_build_user_footer_block();
+      return $block;
     case 'user_header' :
       $block = off_header_feature_build_user_header_block();
+      return $block;
+    case 'group_footer' :
+      $block = off_header_feature_build_group_footer_block();
       return $block;
     case 'group_header' :
       $block = off_header_feature_build_group_header_block();
@@ -165,6 +179,7 @@ function off_header_feature_build_group_header_block() {
     'label'=> 'hidden',
   ));
   $group_field['#weight'] = '1';
+  $group_members = count(og_membership_load_multiple(FALSE, array('gid' => $og_context['gid'], 'entity_type' => 'user')));
 
   // Build the tab menu links.
   $path = 'node/' . $og_context['gid'];
@@ -191,25 +206,110 @@ function off_header_feature_build_group_header_block() {
             '#prefix' => '<h1>',
             '#suffix' => '</h1>'
           ),
-          'privacy-status' => array(
-            '#type' => 'markup',
-            '#markup' => $privacy,
-            '#weight' => 2,
-            '#prefix' => '<div class="privacy-status ' . $privacy . '">',
-            '#suffix' => '</div>',
-          ),
           'description' => $description,
         ),
         'header-details-side' => array(
           '#type' => 'container',
           '#attributes' => array('class' => array('header-details-side')),
           'group' => $group_field,
+          'privacy-status' => array(
+            '#type' => 'markup',
+            '#markup' => $privacy,
+            '#weight' => 3,
+            '#prefix' => '<span class="privacy-status ' . $privacy . '">',
+            '#suffix' => '</span>',
+          ),
+          'member-count' => array(
+            '#type' => 'markup',
+            '#markup' => $group_members . " Members",
+            '#weight' => 2,
+            '#prefix' => '<span class="member-count">',
+            '#suffix' => '</span>',
+          ),
         ),
       ),
       'header-content-tab' => $tabs,
     ),
   );
   return $block;
+}
+
+/**
+ * Build a group footer block.
+ *
+ * @return array
+ *   A Drupal build array.
+ */
+function off_header_feature_build_group_footer_block() {
+  $og_context = og_context();
+  if (empty($og_context)) {
+    return;
+  }
+  $node = node_load($og_context['gid']);
+
+  // Get group title and all parent group titles.
+  $title = off_header_feature_get_title_recursive($node);
+
+  // Build the block render array.
+  $block = array();
+  $block['content'] = off_header_feature_build_footer_content('Group', $title, 'Created', $node->created);
+  return $block;
+}
+
+/**
+ * Build a user footer block.
+ *
+ * @return array
+ *   A Drupal build array.
+ */
+function off_header_feature_build_user_footer_block() {
+  if ((arg(0) === 'user') && is_numeric(arg(1))) {
+    // Load the user from the current path.
+    $account = user_load(arg(1));
+  }
+  if (empty($account)) {
+    return;
+  }
+
+  // Build the block render array.
+  $block = array();
+  $block['content'] = off_header_feature_build_footer_content('User', $account->name, 'Registered', $account->created);
+  return $block;
+}
+
+/**
+ * Build a footer block.
+ *
+ * @return array
+ *   A Drupal build array.
+ */
+function off_header_feature_build_footer_content($title_label, $title, $date_label, $date) {
+  return array(
+    'footer-banner' => array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('footer-banner', 'user')),
+      'footer-details' => array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('footer-details')),
+        'title' => array(
+          '#type' => 'markup',
+          '#attributes' => array('class' => array('footer-title')),
+          '#markup' => "$title_label: $title",
+          '#weight' => 0,
+          '#prefix' => '<span>',
+          '#suffix' => '</span>',
+        ),
+        'created' => array(
+          '#type' => 'markup',
+          '#attributes' => array('class' => array('footer-created')),
+          '#markup' => "$date_label: " . format_date($date, 'long'),
+          '#prefix' => '<span>',
+          '#suffix' => '</span>',
+          '#weight' => 3,
+        ),
+      ),
+    ),
+  );
 }
 
 /**
