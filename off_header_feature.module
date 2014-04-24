@@ -92,13 +92,7 @@ function off_header_feature_build_user_header_block() {
     return;
   }
 
-  // Get group title and all parent group titles.
-  if (!empty($account->realname)) {
-    $title = $account->realname;
-  }
-  else {
-    $title = $account->name;
-  }
+  $title = theme('username', array('account' => $account));
 
   // Build the tab menu links.
   $path = 'user/' . $account->uid;
@@ -114,14 +108,18 @@ function off_header_feature_build_user_header_block() {
       'header-details' => array(
         '#type' => 'container',
         '#attributes' => array('class' => array('header-details')),
-        'header-details-main' => array(
+        'header-details-image' => array(
           '#type' => 'container',
-          '#attributes' => array('class' => array('header-details-main')),
-          'picture' => array(
+          '#attributes' => array('class' => array('header-details-image')),
+          'image' => array(
             '#type' => 'markup',
             '#markup' => theme('user_picture', array('account' => $account)),
             '#weight' => 0,
           ),
+        ),
+        'header-details-main' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-main')),
           'title' => array(
             '#type' => 'markup',
             '#markup' => $title,
@@ -179,12 +177,24 @@ function off_header_feature_build_group_header_block() {
     'label'=> 'hidden',
   ));
   $group_field['#weight'] = '1';
+
+  // Build the image field.
+  $image_field = field_view_field('node', $node, 'field_image', array(
+    'type' => 'image',
+    'label'=> 'hidden',
+    'settings' => array(
+      'image_style' => 'thumbnail',
+    ),
+  ));
+  $image_field['#weight'] = '-1';
+  $image_field['#attributes'] = array('class' => array('header-details-image'));
+
+  $group_field['#weight'] = '1';
   $group_members = count(og_membership_load_multiple(FALSE, array('gid' => $og_context['gid'], 'entity_type' => 'user')));
 
   // Build the tab menu links.
   $path = 'node/' . $og_context['gid'];
   $subpaths = array('Home' => ''); 
-
   $tabs = collabco_integration_tabs_integration($path, $subpaths);
 
   // Build the block render array.
@@ -196,9 +206,15 @@ function off_header_feature_build_group_header_block() {
       'header-details' => array(
         '#type' => 'container',
         '#attributes' => array('class' => array('header-details')),
+        'header-details-image' => array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('header-details-image')),
+          'image' => $image_field,
+        ),
         'header-details-main' => array(
           '#type' => 'container',
           '#attributes' => array('class' => array('header-details-main')),
+          '#weight' => 0,
           'title' => array(
             '#type' => 'markup',
             '#markup' => $title,
@@ -211,6 +227,7 @@ function off_header_feature_build_group_header_block() {
         'header-details-side' => array(
           '#type' => 'container',
           '#attributes' => array('class' => array('header-details-side')),
+          '#weight' => 2,
           'group' => $group_field,
           'privacy-status' => array(
             '#type' => 'markup',
