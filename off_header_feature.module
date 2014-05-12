@@ -96,9 +96,14 @@ function off_header_feature_build_user_header_block() {
 
   // Build the tab menu links.
   $path = 'user/' . $account->uid;
-  $subpaths = array('Profile' => ''); 
-  $tabs = collabco_integration_tabs_integration($path, $subpaths);
-
+  $links = array(
+    'Profile' => array(
+      'subpath' => '',
+      'weight' => 0,
+    ),
+  );
+  $tabs = collabco_integration_tabs_integration($path, $links);
+  $user_flag = collabco_message_feature_flag_links(); 
   // Build the block render array.
   $block = array();
   $block['content'] = array(
@@ -132,6 +137,10 @@ function off_header_feature_build_user_header_block() {
           '#type' => 'container',
           '#attributes' => array('class' => array('header-details-side')),
         ),
+      ),
+      'user-flag' => array(
+        '#type' => 'markup',
+        '#markup' => $user_flag,
       ),
       'header-content-tab' => $tabs,
     ),
@@ -194,8 +203,15 @@ function off_header_feature_build_group_header_block() {
 
   // Build the tab menu links.
   $path = 'node/' . $og_context['gid'];
-  $subpaths = array('Home' => ''); 
-  $tabs = collabco_integration_tabs_integration($path, $subpaths);
+  $links = array(
+    'Home' => array(
+      'subpath' => '',
+      'weight' => 0,
+    ),
+  ); 
+  $tabs = collabco_integration_tabs_integration($path, $links);
+
+  $group_flag = collabco_message_feature_og_flag_links(); 
 
   // Build the block render array.
   $block = array();
@@ -244,6 +260,10 @@ function off_header_feature_build_group_header_block() {
             '#suffix' => '</span>',
           ),
         ),
+      ),
+      'group-flag' => array(
+        '#type' => 'markup',
+        '#markup' => $group_flag,
       ),
       'header-content-tab' => $tabs,
     ),
