@@ -136,11 +136,11 @@ function off_header_feature_build_user_header_block() {
         'header-details-side' => array(
           '#type' => 'container',
           '#attributes' => array('class' => array('header-details-side')),
+          'user-flag' => array(
+            '#type' => 'markup',
+            '#markup' => $user_flag,
+          ),
         ),
-      ),
-      'user-flag' => array(
-        '#type' => 'markup',
-        '#markup' => $user_flag,
       ),
       'header-content-tab' => $tabs,
     ),
@@ -259,11 +259,11 @@ function off_header_feature_build_group_header_block() {
             '#prefix' => '<span class="member-count">',
             '#suffix' => '</span>',
           ),
+          'group-flag' => array(
+            '#type' => 'markup',
+            '#markup' => $group_flag,
+          ),
         ),
-      ),
-      'group-flag' => array(
-        '#type' => 'markup',
-        '#markup' => $group_flag,
       ),
       'header-content-tab' => $tabs,
     ),
