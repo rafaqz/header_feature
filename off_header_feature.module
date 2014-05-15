@@ -102,7 +102,7 @@ function off_header_feature_build_user_header_block() {
       'weight' => 0,
     ),
   );
-  $tabs = collabco_integration_tabs_integration($path, $links);
+  //$tabs = collabco_integration_tabs_integration($path, $links);
   $user_flag = collabco_message_feature_flag_links(); 
   // Build the block render array.
   $block = array();
@@ -142,7 +142,7 @@ function off_header_feature_build_user_header_block() {
           ),
         ),
       ),
-      'header-content-tab' => $tabs,
+      //'header-content-tab' => $tabs,
     ),
   );
   return $block;
