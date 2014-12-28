@@ -1,7 +1,7 @@
-name = OFF Header
+name = Header
 description = Provides a header block for users and groups.
 core = 7.x
-package = Collabco
+package = Features
 dependencies[] = integration
 dependencies[] = fe_block
 dependencies[] = features
