@@ -1,14 +1,14 @@
 <?php
 
 /**
- * @file off_header.module
+ * @file header.module
  * Blocks for user and group headers, and helper functions.
  */
 
 /**
  * Implements hook_block_info().
  */
-function off_header_feature_block_info() {
+function header_feature_block_info() {
   $blocks = array(
     'user_footer' => array(
       'info' => t('User Footer'),
@@ -32,19 +32,19 @@ function off_header_feature_block_info() {
 /**
  * Implements hook_block_view().
  */
-function off_header_feature_block_view($delta='') {
+function header_feature_block_view($delta='') {
   switch($delta) {
     case 'user_footer' :
-      $block = off_header_feature_build_user_footer_block();
+      $block = header_feature_build_user_footer_block();
       return $block;
     case 'user_header' :
-      $block = off_header_feature_build_user_header_block();
+      $block = header_feature_build_user_header_block();
       return $block;
     case 'group_footer' :
-      $block = off_header_feature_build_group_footer_block();
+      $block = header_feature_build_group_footer_block();
       return $block;
     case 'group_header' :
-      $block = off_header_feature_build_group_header_block();
+      $block = header_feature_build_group_header_block();
       return $block;
   }
 } 
@@ -55,20 +55,20 @@ function off_header_feature_block_view($delta='') {
  * Hide title user for groups pages, as it is allready in the header block.
  * There could be a check to see if the header block is enabled?
  */
-function off_header_feature_preprocess_page(&$vars) {
+function header_feature_preprocess_page(&$vars) {
   // show_title is true by default, unless it's allready set.
   if (!isset($vars['show_title'])) { 
     $vars['show_title'] = TRUE; 
   }
   // Check if header blocks are set.
   foreach($vars['page'] as $region) {
-    if (isset($region['off_header_feature_group_header'])) {
+    if (isset($region['header_feature_group_header'])) {
       if (isset($vars['node']->{OG_GROUP_FIELD}) && ($vars['node']->{OG_GROUP_FIELD}['und'][0]['value'] === '1')) { 
         $vars['show_title'] = FALSE;
       }
       return;
     }
-    if (isset($region['off_header_feature_user_header'])) {
+    if (isset($region['header_feature_user_header'])) {
       if ((arg(0) === 'user')) {
         $vars['show_title'] = FALSE; 
       }
@@ -83,7 +83,7 @@ function off_header_feature_preprocess_page(&$vars) {
  * @return array
  *   A Drupal build array.
  */
-function off_header_feature_build_user_header_block() {
+function header_feature_build_user_header_block() {
   if ((arg(0) === 'user') && is_numeric(arg(1))) {
     // Load the user from the current path.
     $account = user_load(arg(1));
@@ -102,8 +102,8 @@ function off_header_feature_build_user_header_block() {
       'weight' => 0,
     ),
   );
-  //$tabs = collabco_integration_tabs_integration($path, $links);
-  $user_flag = collabco_message_feature_flag_links(); 
+  //$tabs = integration_tabs_integration($path, $links);
+  $user_flag = message_feature_flag_links(); 
   // Build the block render array.
   $block = array();
   $block['content'] = array(
@@ -154,7 +154,7 @@ function off_header_feature_build_user_header_block() {
  * @return array
  *   A Drupal build array.
  */
-function off_header_feature_build_group_header_block() {
+function header_feature_build_group_header_block() {
   $og_context = og_context();
   if (empty($og_context)) {
     return;
@@ -162,7 +162,7 @@ function off_header_feature_build_group_header_block() {
   $node = node_load($og_context['gid']);
 
   // Get group title and all parent group titles.
-  $title = off_header_feature_get_title_recursive($node);
+  $title = header_feature_get_title_recursive($node);
 
   // Determine group privacy status.
   if (!empty($node->{OG_ACCESS_FIELD}['und'][0]['value']) && $node->{OG_ACCESS_FIELD}['und'][0]['value'] === '1') {
@@ -209,9 +209,9 @@ function off_header_feature_build_group_header_block() {
       'weight' => 0,
     ),
   ); 
-  $tabs = collabco_integration_tabs_integration($path, $links);
+  $tabs = integration_tabs_integration($path, $links);
 
-  $group_flag = collabco_message_feature_og_flag_links(); 
+  $group_flag = message_feature_og_flag_links(); 
 
   // Build the block render array.
   $block = array();
@@ -277,7 +277,7 @@ function off_header_feature_build_group_header_block() {
  * @return array
  *   A Drupal build array.
  */
-function off_header_feature_build_group_footer_block() {
+function header_feature_build_group_footer_block() {
   $og_context = og_context();
   if (empty($og_context)) {
     return;
@@ -285,11 +285,11 @@ function off_header_feature_build_group_footer_block() {
   $node = node_load($og_context['gid']);
 
   // Get group title and all parent group titles.
-  $title = off_header_feature_get_title_recursive($node);
+  $title = header_feature_get_title_recursive($node);
 
   // Build the block render array.
   $block = array();
-  $block['content'] = off_header_feature_build_footer_content('Group', $title, 'Created', $node->created);
+  $block['content'] = header_feature_build_footer_content('Group', $title, 'Created', $node->created);
   return $block;
 }
 
@@ -299,7 +299,7 @@ function off_header_feature_build_group_footer_block() {
  * @return array
  *   A Drupal build array.
  */
-function off_header_feature_build_user_footer_block() {
+function header_feature_build_user_footer_block() {
   if ((arg(0) === 'user') && is_numeric(arg(1))) {
     // Load the user from the current path.
     $account = user_load(arg(1));
@@ -310,7 +310,7 @@ function off_header_feature_build_user_footer_block() {
 
   // Build the block render array.
   $block = array();
-  $block['content'] = off_header_feature_build_footer_content('User', $account->name, 'Registered', $account->created);
+  $block['content'] = header_feature_build_footer_content('User', $account->name, 'Registered', $account->created);
   return $block;
 }
 
@@ -320,7 +320,7 @@ function off_header_feature_build_user_footer_block() {
  * @return array
  *   A Drupal build array.
  */
-function off_header_feature_build_footer_content($title_label, $title, $date_label, $date) {
+function header_feature_build_footer_content($title_label, $title, $date_label, $date) {
   return array(
     'footer-banner' => array(
       '#type' => 'container',
@@ -354,12 +354,12 @@ function off_header_feature_build_footer_content($title_label, $title, $date_lab
  *
  * @return array of group ids.
  */
-function off_header_feature_get_title_recursive($group) {
+function header_feature_get_title_recursive($group) {
   $title = l($group->title,"node/{$group->nid}");
   if (empty($group->{OG_AUDIENCE_FIELD}['und'][0]['target_id'])) {
     return $title;
   }
   $group_parent = node_load($group->{OG_AUDIENCE_FIELD}['und'][0]['target_id']);
-  return off_header_feature_get_title_recursive($group_parent) . ' > ' . $title;
+  return header_feature_get_title_recursive($group_parent) . ' > ' . $title;
 }
 

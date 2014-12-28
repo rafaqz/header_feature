@@ -1,23 +1,23 @@
 <?php
 /**
  * @file
- * off_header_feature.features.fe_block_settings.inc
+ * header_feature.features.fe_block_settings.inc
  */
 
 /**
  * Implements hook_default_fe_block_settings().
  */
-function off_header_feature_default_fe_block_settings() {
+function header_feature_default_fe_block_settings() {
   $export = array();
 
   $export['version'] = '2.0';
 
-  $export['off_header_feature-group_footer'] = array(
+  $export['header_feature-group_footer'] = array(
     'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'group_footer',
-    'module' => 'off_header_feature',
+    'module' => 'header_feature',
     'node_types' => array(),
     'pages' => '',
     'roles' => array(),
@@ -39,12 +39,12 @@ function off_header_feature_default_fe_block_settings() {
     'visibility' => 0,
   );
 
-  $export['off_header_feature-group_header'] = array(
+  $export['header_feature-group_header'] = array(
     'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'group_header',
-    'module' => 'off_header_feature',
+    'module' => 'header_feature',
     'node_types' => array(),
     'pages' => '',
     'roles' => array(),
@@ -66,12 +66,12 @@ function off_header_feature_default_fe_block_settings() {
     'visibility' => 0,
   );
 
-  $export['off_header_feature-user_footer'] = array(
+  $export['header_feature-user_footer'] = array(
     'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'user_footer',
-    'module' => 'off_header_feature',
+    'module' => 'header_feature',
     'node_types' => array(),
     'pages' => '',
     'roles' => array(),
@@ -93,12 +93,12 @@ function off_header_feature_default_fe_block_settings() {
     'visibility' => 0,
   );
 
-  $export['off_header_feature-user_header'] = array(
+  $export['header_feature-user_header'] = array(
     'cache' => -1,
     'css_class' => '',
     'custom' => 0,
     'delta' => 'user_header',
-    'module' => 'off_header_feature',
+    'module' => 'header_feature',
     'node_types' => array(),
     'pages' => '',
     'roles' => array(),
